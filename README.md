@@ -27,12 +27,12 @@ make install
 
 ```bash
 export LLVM_DIR=$(realpath ~/.llvm)
-pip3 install -e .
+pip3 install . -vvvv
 ```
 
 # Executing
 
 ```bash
-export PYTHONPATH=${LLVM_DIR}/python_packages/mlir_core
+export PYTHONPATH=$PWD/install/python_packages
 python3 ./edsl/driver.py
 ```

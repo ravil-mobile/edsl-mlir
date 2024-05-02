@@ -1,4 +1,5 @@
 import os
+import ninja
 import shutil
 import sys
 import sysconfig
@@ -32,16 +33,24 @@ class CMakeBuild(build_ext):
     extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.path)))
     make_dir = shutil.which('make')
     python_include_dir = sysconfig.get_path("platinclude")
+    ninja_executable_path = Path(ninja.BIN_DIR) / "ninja"
     cmake_args = [
       f"{get_base_dir()}",
-      f"-DCMAKE_MAKE_PROGRAM={make_dir}",
+      # f"-DCMAKE_MAKE_PROGRAM={make_dir}",
       f"-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-      f"-DLLVM_ENABLE_WERROR=ON",
+      # f"-DLLVM_ENABLE_WERROR=ON",
       f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
       f"-DPython3_EXECUTABLE:FILEPATH={sys.executable}",
       f"-DCMAKE_VERBOSE_MAKEFILE=ON",
       f"-DPYTHON_INCLUDE_DIRS={python_include_dir}",
+      f"-DCMAKE_INSTALL_PREFIX={Path(__file__).parent.absolute() / 'install'}",
+      "-DLLVM_USE_LINKER=lld",
+      "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+      "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
+      "-GNinja",
+      f"-DCMAKE_MAKE_PROGRAM:FILEPATH={ninja_executable_path}",
     ]
+
     llvm_dir = os.getenv("LLVM_DIR") or None
     cmake_prefix = []
     if llvm_dir:
@@ -72,28 +81,19 @@ class CMakeBuild(build_ext):
 
     env = os.environ.copy()
     cmake_dir = get_cmake_dir()
-    proc = subprocess.run(
+    subprocess.run(
       ["cmake", ext.sourcedir, *cmake_args],
       cwd=cmake_dir,
       check=True,
       env=env,
-      stdout=subprocess.PIPE,
-      stderr=subprocess.STDOUT,
-      text=True
     )
-    with open(Path(extdir) / 'cmake-conf.log', 'w') as file:
-      file.write(proc.stdout)
 
     build_args = ["--config", build_type]
-    proc = subprocess.run(
-      ["cmake", "--build", "."] + build_args,
+    subprocess.run(
+      ["cmake", "--build", ".", "--target", "install"] + build_args,
       cwd=cmake_dir,
-      stdout=subprocess.PIPE,
-      stderr=subprocess.STDOUT,
-      text=True
+      check=True
     )
-    with open(Path(extdir) / 'cmake-build.log', 'w') as file:
-        file.write(proc.stdout)
 
 class CMakeClean(clean):
   def initialize_options(self):
@@ -124,10 +124,10 @@ setup(
   install_requires=[],
   package_data={},
   include_package_data=True,
-  ext_modules=[CMakeExtension("edsl.edsl_cpp", "edsl/edsl_cpp")],
+  ext_modules=[CMakeExtension("_edsl", "edsl")],
   cmdclass={
     "build_ext": CMakeBuild,
-    "clean": CMakeClean,
+    # "clean": CMakeClean,
   },
   zip_safe=False,
   keywords=["EDSL", "Python", "MLIR"],

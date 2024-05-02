@@ -8,6 +8,3 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(compiler)
-
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/compiler/misc/__init__.py
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

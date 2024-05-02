@@ -1,19 +1,18 @@
-from mlir.ir import Context, Module, get_dialect_registry
-from mlir.ir import InsertionPoint, Location, F32Type
-from mlir.dialects import func, arith
-from mlir.dialects import arith
-from edsl_cpp import entry
+from edsl.ir import Context, Module, get_dialect_registry
+from edsl.ir import InsertionPoint, Location, F32Type
+from edsl.dialects import func, arith
+from edsl.dialects import arith
+from edsl._mlir_libs._edsl import entry
 
 
 def main():
   registry = get_dialect_registry()
   context = Context()
   context.append_dialect_registry(registry)
-  module = None
-  with context:
-    module = Module.create(Location.unknown())
-    with InsertionPoint(module.body), Location.unknown():
-      fp_type = F32Type.get()
+  with context, Location.unknown():
+    module = Module.create()
+    fp_type = F32Type.get()
+    with InsertionPoint(module.body):
       function = func.FuncOp("test", ([fp_type, fp_type, fp_type], [fp_type]))
 
       with InsertionPoint(function.add_entry_block()) as block:
