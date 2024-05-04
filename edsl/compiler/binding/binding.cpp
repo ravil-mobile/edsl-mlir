@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 
-PYBIND11_MODULE(edsl_cpp, m) {
+PYBIND11_MODULE(_edsl, m) {
   m.doc() = "edsl python bindings";
   m.def("entry", [](pybind11::object capsule){
     MlirModule mlirModule = mlirPythonCapsuleToModule(capsule.ptr());
