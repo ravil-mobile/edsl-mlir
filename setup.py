@@ -4,7 +4,7 @@ import shutil
 import sys
 import sysconfig
 import subprocess
-from setuptools import Extension, setup
+from setuptools import Extension, setup, find_packages
 from setuptools.command.build_ext import build_ext
 from distutils.command.clean import clean
 from pathlib import Path
@@ -115,7 +115,7 @@ setup(
   author_email="ravil.aviva.com@gmail.com",
   description="Python EDSL Example",
   long_description="",
-  packages=[],
+  packages=find_packages(),
   entry_points={
     'console_scripts': [
       'my-edsl=edsl.driver:main',

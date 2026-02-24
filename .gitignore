@@ -1,6 +1,7 @@
 .vscode
 *.sw*
 build
+install
 __pycache__
 *egg-info
 .idea
